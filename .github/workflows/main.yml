@@ -1,4 +1,4 @@
-name: Android CI
+name: MyPacApp CI
 
 on:
   push:
@@ -9,29 +9,39 @@ on:
       - master
 
 jobs:
-  build:
+  build-and-test:
 
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
+      # 1. Checkout code
+      - name: Checkout source code
         uses: actions/checkout@v4
 
+      # 2. Set up Java 17 for Android builds
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: 17
 
-      - name: Grant execute permission to gradlew
+      # 3. Set up Android SDK
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      # 4. Make Gradle wrapper executable
+      - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      # 5. Build the app
       - name: Build with Gradle
         run: ./gradlew build
 
+      # 6. Run unit tests
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest
 
-      - name: Run instrumentation tests (optional, needs emulator)
-        if: false  # Set to true and configure emulator steps if needed
+      # 7. OPTIONAL: Run UI tests on emulator (disabled by default)
+      - name: Run instrumentation tests
+        if: false  # Set to true if emulator setup is added
         run: ./gradlew connectedDebugAndroidTest
